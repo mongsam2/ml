@@ -7,10 +7,12 @@ import os
 CATEGORY_LIST = ["circle", "diagonal_left", "diagonal_right", "horizontal", "vertical"]
 
 
-def load_data(data_folder: str):
+def load_data(data_folder: str) -> pd.DataFrame:
     """
-    data_folder: 데이터 파일이 저장된 폴더 이름 (ex. data1 or data2)
-    output: all_data
+    input:
+        - data_folder: ex) data1, data2 ...
+
+    output:
         - df: dataframe
     """
     all_datas = []
@@ -20,7 +22,7 @@ def load_data(data_folder: str):
         # 포즈 하나의 데이터 추출 (ex. circle>1.txt, circle>2.txt)
         for data_id in os.listdir(folder_path):
             data_file_path = os.path.join(folder_path, data_id)
-            pose_data = get_pose_data(data_file_path)  # 동작 하나의 데이터
+            pose_data = _get_pose_data(data_file_path)  # 동작 하나의 데이터
             data_id = data_id.split(".")[0]
             pose_data = [
                 [category, int(data_id), time_step, line[0], line[1], line[2]]
@@ -34,15 +36,14 @@ def load_data(data_folder: str):
     )
 
 
-def get_pose_data(file_path):
+def _get_pose_data(file_path: str) -> list[tuple[int]]:
     """
-    하나의 포즈 데이터를 추출하는 함수 (ex. 1.txt, 2.txt, 3.txt ...)
+    하나의 포즈 데이터를 시각화하는 함수 (ex. 1.txt, 2.txt, 3.txt ...)
+    input:
+        - file_path: ex) data1/circle/1.txt
+
     output:
-        [
-            (x, y, z),
-            (x, y, z),
-            ...
-        ]
+        - data_array
     """
     with open(file_path, "r", encoding="utf-8") as f:
         data_list = f.readlines()
@@ -59,19 +60,15 @@ def get_pose_data(file_path):
     return data_array
 
 
-def write_data(df, category: str, data_id: int):
+def write_data(df, category: str, data_id: int) -> plt.figure:
     """
-    # fig: 그림을 그릴 전체 캔버스 객체
-    # pos: subplot 위치 (예: 121, 122)
+    input:
+        - df: Data Frame
+        - category: ["circle", "diagonal_left", "diagonal_right", "horizontal", "vertical"]
+        - data_id: 1 ~
     """
     series = df[(df["category"] == category) & (df["data_id"] == data_id)]
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
     ax.plot(series["x"], series["y"], series["z"])
-    # plt.show()
     return fig
-
-
-if __name__ == "__main__":
-    df = load_data("data1")
-    write_data(df, "circle", "1")
